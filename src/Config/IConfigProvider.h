@@ -16,12 +16,12 @@ public:
   virtual ~IConfigProvider() = default;
 
   virtual void setConfig(std::shared_ptr<Config> config) {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard lock(m_mutex);
     m_config = config;
   }
 
   virtual std::shared_ptr<Config> getConfig() const {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard lock(m_mutex);
     return m_config;
   }
 

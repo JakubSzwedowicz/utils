@@ -1,8 +1,7 @@
 {
     "dependencies": [
+        "quill",
         "spdlog",
-        "gtest",
-        "nlohmann-json",
-        "fmt"
+        "gtest"
     ]
 }

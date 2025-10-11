@@ -1,5 +1,5 @@
 add_subdirectory(PublishSubscribe)
-add_subdirectory(Logger)
+add_subdirectory(Logging)
 add_subdirectory(Config)
 
 add_library(Utils INTERFACE)
@@ -10,7 +10,7 @@ target_compile_features(Utils INTERFACE cxx_std_23)
 target_link_libraries(Utils
     INTERFACE
         Utils::Config
-        Utils::Logger
+        Utils::Logging
         Utils::PublishSubscribe
 )
 
@@ -20,7 +20,7 @@ target_include_directories(Utils
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-install(TARGETS Utils Config ConfigParser Logger PublishSubscribe
+install(TARGETS Utils Config Logging ConfigParser PublishSubscribe
     EXPORT UtilsTargets
     FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Utils
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

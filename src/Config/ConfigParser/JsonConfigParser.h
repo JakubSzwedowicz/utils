@@ -47,8 +47,9 @@ class JsonConfigParser : public IConfigParser<Config> {
         auto ec = glz::write_json(config, json);
         if (ec) {
             std::cerr << "Error writing to JSON config: " << ec << std::endl;
+        } else {
+            out << json;
         }
-        out << json;
         return ec;
     }
 };
