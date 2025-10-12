@@ -1,0 +1,9 @@
+{
+  "versions": [
+    {
+      "version": "1.0.0",
+      "git-tree": "094f7e05ff5917dd2973aa6e6ec9821feeb9aff0", // The Git commit hash of your Utils source code at version 1.0.0
+      "port-version": 0
+    }
+  ]
+}
