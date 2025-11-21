@@ -1,13 +1,14 @@
 #include <gtest/gtest.h>
+
 #include <memory>
 
 #include "Config/ConfigManagers.h"
-#include "PublishSubscribe/IPublisherSubscriber.h"
 #include "Mocks.h"
+#include "PublishSubscribe/IPublisherSubscriber.h"
 
 // Test ConfigPublisher functionality
 class testConfigPublisher : public ::testing::Test {
-protected:
+   protected:
     void SetUp() override {
         publisher = std::make_unique<Utils::Config::ConfigPublisher<TestConfig>>();
         subscriber = std::make_shared<MockConfigSubscriber>();
