@@ -6,5 +6,5 @@ namespace Config {
 
 // Exists to provide a compilation unit for the static library
 
-} // namespace Config
-} // namespace Utils
+}  // namespace Config
+}  // namespace Utils

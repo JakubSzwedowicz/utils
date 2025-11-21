@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+
 #include <memory>
 #include <sstream>
 
@@ -8,7 +9,7 @@
 // Note: Since glaze reflection is commented out, these tests will focus on
 // the interface and error handling rather than actual JSON serialization
 class testJsonConfigParser : public ::testing::Test {
-protected:
+   protected:
     void SetUp() override {
         // Note: JsonConfigParser requires glaze reflection to be properly set up
         // For now, we'll test the interface and error conditions
@@ -25,9 +26,7 @@ protected:
 
 TEST_F(testJsonConfigParser, ParserCreation) {
     // Test that parser can be created (this will fail if glaze reflection isn't set up)
-    EXPECT_NO_THROW({
-        auto parser = std::make_unique<Utils::Config::JsonConfigParser<TestConfig>>();
-    });
+    EXPECT_NO_THROW({ auto parser = std::make_unique<Utils::Config::JsonConfigParser<TestConfig>>(); });
 }
 
 TEST_F(testJsonConfigParser, ReadInvalidJson) {
@@ -53,14 +52,13 @@ TEST_F(testJsonConfigParser, ReadEmptyStream) {
 // Note: The following tests would require proper glaze reflection setup
 // which is currently commented out in the original test file
 
-
 TEST_F(testJsonConfigParser, WriteAndReadConfig) {
     auto parser = std::make_unique<Utils::Config::JsonConfigParser<TestConfig>>();
     std::stringstream stream;
 
     // Write config to JSON
     int writeResult = parser->writeConfig(testConfig, stream);
-    EXPECT_EQ(writeResult, 0); // Success
+    EXPECT_EQ(writeResult, 0);  // Success
 
     // Verify JSON was written
     std::string jsonContent = stream.str();
@@ -92,6 +90,6 @@ TEST_F(testJsonConfigParser, ReadPartialJson) {
     EXPECT_EQ(readConfig->name, "partial");
     EXPECT_EQ(readConfig->value, 999);
     // Should have default values for missing fields
-    EXPECT_DOUBLE_EQ(readConfig->rate, 3.14); // default value
-    EXPECT_TRUE(readConfig->enabled); // default value
+    EXPECT_DOUBLE_EQ(readConfig->rate, 3.14);  // default value
+    EXPECT_TRUE(readConfig->enabled);          // default value
 }

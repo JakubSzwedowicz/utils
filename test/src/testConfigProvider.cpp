@@ -1,16 +1,17 @@
 #include <gtest/gtest.h>
+
+#include <atomic>
+#include <chrono>
 #include <memory>
 #include <thread>
-#include <chrono>
 #include <vector>
-#include <atomic>
 
 #include "Config/IConfigProvider.h"
 #include "Mocks.h"
 
 // Test IConfigProvider functionality
 class testConfigProvider : public ::testing::Test {
-protected:
+   protected:
     void SetUp() override {
         provider = std::make_unique<Utils::Config::IConfigProvider<TestConfig>>();
         testConfig = createTestConfig("test", 100, 2.71, false);
@@ -43,10 +44,7 @@ TEST_F(testConfigProvider, ThreadSafety) {
     // Function to set and get config in a loop
     auto workerFunction = [&](int threadId) {
         for (int i = 0; i < numOperations; ++i) {
-            auto config = createTestConfig("thread_" + std::to_string(threadId),
-                                         threadId * 1000 + i,
-                                         1.41,
-                                         true);
+            auto config = createTestConfig("thread_" + std::to_string(threadId), threadId * 1000 + i, 1.41, true);
 
             provider->setConfig(config);
 

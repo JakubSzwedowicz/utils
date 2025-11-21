@@ -6,6 +6,7 @@
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
+
     LOG_I("This is an info log. {}", 123);
     LOG_D("Some debug {} print", "YOLO");
     LOG_W("Some warn {} print", "YOLOLOLO");
