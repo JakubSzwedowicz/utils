@@ -1,17 +1,19 @@
 #include <gtest/gtest.h>
+#include <spdlog/fmt/fmt.h>
+#include <spdlog/sinks/base_sink.h>
+
 #include "Logging/Logger.h"
 #include "Logging/LoggerMacros.h"
-#include <spdlog/sinks/base_sink.h>
-#include <spdlog/fmt/fmt.h>
 
 using namespace Utils::Logging;
 
 // A thread-safe sink for testing that captures log output globally or per instance
-template<typename Mutex>
+template <typename Mutex>
 class TestSink : public spdlog::sinks::base_sink<Mutex> {
-public:
+   public:
     std::string log_contents;
-protected:
+
+   protected:
     void sink_it_(const spdlog::details::log_msg& msg) override {
         spdlog::memory_buf_t formatted;
         spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
@@ -31,10 +33,11 @@ class LoggerTest : public ::testing::Test {
         return c;
     }
 
-    LoggerTest() : config(createTestConfig()), m_logger("TestLogger", config), testSink(std::make_shared<TestSink_mt>()) {
+    LoggerTest()
+        : config(createTestConfig()), m_logger("TestLogger", config), testSink(std::make_shared<TestSink_mt>()) {
         m_logger.clearSinks();
         m_logger.addSink(testSink);
-        testSink->set_level(spdlog::level::trace); 
+        testSink->set_level(spdlog::level::trace);
     }
 
     std::shared_ptr<LoggerConfig> config;
@@ -58,7 +61,7 @@ TEST_F(LoggerTest, MacrosExecute) {
 
 TEST_F(LoggerTest, FormattingWorks) {
     LOG_I("String: {}, Int: {}, Float: {:.2f}", "test", 42, 3.14159);
-    
+
     EXPECT_TRUE(testSink->log_contents.find("String: test, Int: 42, Float: 3.14") != std::string::npos);
 }
 
@@ -80,14 +83,12 @@ TEST_F(LoggerTest, NamedLoggerOverride) {
 
     config->loggersLogLevels[m_logger.getName()] = LogLevel::DEBUG;
     m_logger.onUpdate(config);
-    
+
     LOG_D("Debug message");
     EXPECT_TRUE(testSink->log_contents.find("Debug message") != std::string::npos);
 }
 
-TEST_F(LoggerTest, FlushDoesNotThrow) {
-    EXPECT_NO_THROW(m_logger.flush());
-}
+TEST_F(LoggerTest, FlushDoesNotThrow) { EXPECT_NO_THROW(m_logger.flush()); }
 
 TEST_F(LoggerTest, LogLevelFiltering) {
     auto newConfig = std::make_shared<LoggerConfig>();
