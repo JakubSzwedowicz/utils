@@ -14,7 +14,7 @@ namespace Utils::Logging {
 struct LoggerConfig {
     std::string filename = "mainLog.txt";
     LogLevel globalLogLevel = LogLevel::INFO;
-    std::unordered_map<std::string, LogLevel> filesLogLevels;
+    std::unordered_map<std::string, LogLevel> loggersLogLevels;
 };
 
 }  // namespace Utils::Logger

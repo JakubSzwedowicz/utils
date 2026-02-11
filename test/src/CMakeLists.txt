@@ -3,6 +3,7 @@ add_executable(
     testConfigProvider.cpp
     testConfigPublisher.cpp
     testJsonConfigParser.cpp
+    testLogging.cpp
 )
 
 target_link_libraries(

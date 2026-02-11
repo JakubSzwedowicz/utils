@@ -5,6 +5,9 @@
 #include "Logging/LoggerMacros.h"
 
 int main() {
+    // Defines the logger instance for the macros in this scope
+    auto& m_logger = Utils::Logging::Logger::getInstance();
+
     std::cout << "Hello, World!" << std::endl;
 
     LOG_I("This is an info log. {}", 123);
