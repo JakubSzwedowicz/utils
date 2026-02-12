@@ -1,0 +1,110 @@
+name: Release & Publish
+
+on:
+  push:
+    branches: [ main, master, develop ]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.REGISTRY_PAT }}
+
+      - name: Setup vcpkg
+        run: |
+          ./lib/vcpkg/bootstrap-vcpkg.sh
+          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/lib/vcpkg" >> $GITHUB_ENV
+
+      - name: Setup Workspace
+        run: |
+          chmod +x scripts/setup_workspace.sh
+          ./scripts/setup_workspace.sh
+
+      - name: Tag Release
+        id: tag_version
+        run: |
+          VERSION=$(jq -r '."version-string"' vcpkg.json)
+          TAG="v$VERSION"
+          if git rev-parse "origin/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists remote"
+            echo "new_tag=false" >> $GITHUB_OUTPUT
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" -m "Release $TAG"
+            git push origin "$TAG"
+            echo "new_tag=true" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Calculate SHA512
+        if: steps.tag_version.outputs.new_tag == 'true'
+        id: calculate_sha
+        run: |
+             VERSION=${{ steps.tag_version.outputs.version }}
+             URL="https://github.com/${{ github.repository }}/archive/refs/tags/v${VERSION}.tar.gz"
+             echo "Downloading from $URL"
+             sleep 5 # Give GitHub a moment to realize the tag exists
+             curl -L -o release.tar.gz "$URL"
+             SHA512=$(sha512sum release.tar.gz | awk '{print $1}')
+             echo "SHA512=$SHA512" >> $GITHUB_OUTPUT
+
+      - name: Publish to Registry
+        if: steps.tag_version.outputs.new_tag == 'true'
+        env:
+          REGISTRY_PAT: ${{ secrets.REGISTRY_PAT }}
+          VERSION: ${{ steps.tag_version.outputs.version }}
+          SHA512: ${{ steps.calculate_sha.outputs.SHA512 }}
+        run: |
+          # Checkout Registry
+          echo "Cloning registry..."
+          git clone https://x-access-token:${REGISTRY_PAT}@github.com/JakubSzwedowicz/vcpkg-registry.git registry_repo
+          cd registry_repo
+          
+          # Setup Git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create/Update Port
+          mkdir -p ports/utils
+          cp ../vcpkg.json ports/utils/vcpkg.json
+          
+          # Create Portfile
+          cat <<EOF > ports/utils/portfile.cmake
+          vcpkg_from_github(
+              OUT_SOURCE_PATH SOURCE_PATH
+              REPO JakubSzwedowicz/utils
+              REF "v${VERSION}"
+              SHA512 ${SHA512}
+              HEAD_REF develop
+          )
+
+          vcpkg_cmake_configure(
+              SOURCE_PATH "\${SOURCE_PATH}"
+          )
+
+          vcpkg_cmake_install()
+
+          vcpkg_cmake_config_fixup(
+              PACKAGE_NAME "utils"
+              CONFIG_PATH "lib/cmake/utils"
+          )
+
+          file(REMOVE_RECURSE "\${CURRENT_PACKAGES_DIR}/debug/include")
+          file(REMOVE_RECURSE "\${CURRENT_PACKAGES_DIR}/debug/share")
+          EOF
+
+          # Update Registry Database
+          ../lib/vcpkg/vcpkg x-add-version --all
+          
+          # Commit and Push
+          git add .
+          if git diff --staged --quiet; then
+            echo "No changes to registry"
+          else
+            git commit -m "Update utils to v${VERSION}"
+            git push origin main
+          fi

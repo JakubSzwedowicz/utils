@@ -1,0 +1,29 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup vcpkg
+        run: |
+          ./lib/vcpkg/bootstrap-vcpkg.sh
+          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/lib/vcpkg" >> $GITHUB_ENV
+
+      - name: Setup Workspace (Install Deps)
+        run: |
+          chmod +x scripts/setup_workspace.sh
+          ./scripts/setup_workspace.sh
+
+      - name: Build & Test (All Release)
+        run: |
+          cmake --workflow --preset all-release

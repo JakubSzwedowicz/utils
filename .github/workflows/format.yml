@@ -1,0 +1,29 @@
+name: Code Formatting
+
+on:
+  pull_request:
+    branches: [ master, main, develop ]
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Format Code
+        run: |
+          find src -name "*.cpp" -o -name "*.hpp" -o -name "*.h" | xargs clang-format -i
+          find test -name "*.cpp" -o -name "*.hpp" -o -name "*.h" | xargs clang-format -i
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: format code with clang-format"
+          file_pattern: "**/*.cpp **/*.hpp **/*.h"

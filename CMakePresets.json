@@ -116,6 +116,24 @@
           "name": "test-all-debug"
         }
       ]
+    },
+    {
+      "name": "all-release",
+      "description": "configure-build-test-release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "release"
+        },
+        {
+          "type": "build",
+          "name": "app-release"
+        },
+        {
+          "type": "test",
+          "name": "test-all-release"
+        }
+      ]
     }
   ]
 }
