@@ -17,4 +17,4 @@ struct LoggerConfig {
     std::unordered_map<std::string, LogLevel> loggersLogLevels;
 };
 
-}  // namespace Utils::Logger
+}  // namespace Utils::Logging
