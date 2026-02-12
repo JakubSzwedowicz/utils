@@ -6,8 +6,4 @@ sudo apt-get install cmake
 sudo apt-get install ninja-build
 sudo apt-get install curl zip unzip tar
 sudo apt-get install pkg-config
-sudo apt-get install libstdc++-13-dev
-sudo apt-get install clang-20
-sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-20 100
-sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100
 sudo apt-get install clang-format
