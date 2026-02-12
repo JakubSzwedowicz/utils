@@ -7,7 +7,6 @@
 
 using namespace Utils::Logging;
 
-// A thread-safe sink for testing that captures log output globally or per instance
 template <typename Mutex>
 class TestSink : public spdlog::sinks::base_sink<Mutex> {
    public:

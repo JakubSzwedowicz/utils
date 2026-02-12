@@ -51,7 +51,6 @@ void Logger::onUpdate(const std::shared_ptr<LoggerConfig>& newConfig) {
 
 template <LogLevel Level>
 void Logger::log(std::string_view message) {
-    // Compile-time conversion of Level to spdlog level
     m_logger->log(logLevelToSpdlog(Level), message);
 }
 
@@ -60,7 +59,6 @@ void Logger::flush() { m_logger->flush(); }
 void Logger::addSink(std::shared_ptr<spdlog::sinks::sink> sink) {
     if (!sink) return;
     m_logger->sinks().push_back(sink);
-    // Ensure the new sink captures everything allowed by the logger
     sink->set_level(spdlog::level::trace);
 }
 
@@ -78,16 +76,12 @@ void Logger::updateLoggerLevel() {
 
 std::shared_ptr<spdlog::logger> Logger::buildLogger(const std::string& name,
                                                     const std::shared_ptr<LoggerConfig>& config) {
-    // Lifecycle Manager ensures spdlog::shutdown is called on exit or signal
     struct LifecycleManager {
         LifecycleManager() {
-            // Register cleanup on normal exit
             std::atexit([]() { spdlog::shutdown(); });
 
-            // Register signal handlers
             auto handler = [](int sig) {
                 spdlog::shutdown();
-                // Restore default handler and raise signal again to terminate
                 std::signal(sig, SIG_DFL);
                 std::raise(sig);
             };

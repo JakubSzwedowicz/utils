@@ -3,11 +3,9 @@
 //
 
 #pragma once
-#include <type_traits>
+#include <cstdint>
 
 namespace Utils::Logging {
 enum class LogLevel : uint8_t { DEBUG, INFO, WARNING, ERROR, CRITICAL, OFF, _COUNT };
 
-
-
-}  // namespace Utils::Logger
+}  // namespace Utils::Logging

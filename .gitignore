@@ -33,8 +33,10 @@
 
 # IDEs
 .vscode
+.cache
 *idea
 
 # Project artifacts
 build
 cmake-build-debug
+compile_commands.json

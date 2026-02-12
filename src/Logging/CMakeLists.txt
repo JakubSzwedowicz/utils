@@ -17,8 +17,8 @@ target_sources(Logging
 )
 
 find_package(spdlog REQUIRED)
-target_link_libraries(Logging PUBLIC spdlog::spdlog)
-target_compile_features(Logging PUBLIC cxx_std_23)
+target_link_libraries(Logging PRIVATE spdlog::spdlog)
+target_compile_features(Logging PRIVATE cxx_std_23)
 target_include_directories(Logging
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

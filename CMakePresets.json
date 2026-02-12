@@ -22,7 +22,9 @@
       "inherits": "base-toolchain",
       "cacheVariables": {
         "CMAKE_CXX_FLAGS": "-Wall -Wextra -Og -frecord-gcc-switches",
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_CXX_COMPILER": "clang++"
       }
     },
     {

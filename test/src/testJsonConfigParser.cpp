@@ -20,8 +20,6 @@ class testJsonConfigParser : public ::testing::Test {
     }
 
     TestConfig testConfig;
-    // Note: We'll create the parser in each test method due to potential
-    // glaze reflection requirements
 };
 
 TEST_F(testJsonConfigParser, ParserCreation) {

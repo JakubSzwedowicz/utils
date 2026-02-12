@@ -15,11 +15,10 @@ namespace Config {
 template <typename Config>
 class JsonConfigParser : public IConfigParser<Config> {
    public:
-    JsonConfigParser() { static_assert(glz::detail::reflectable<Config>); }
+    JsonConfigParser() { static_assert(glz::reflectable<Config>); }
 
-    std::shared_ptr<Config> readConfig(std::istream &jsonStream) const {
-        std::string json((std::istreambuf_iterator<char>(jsonStream)),
-                        std::istreambuf_iterator<char>());
+    std::shared_ptr<Config> readConfig(std::istream& jsonStream) const {
+        std::string json((std::istreambuf_iterator<char>(jsonStream)), std::istreambuf_iterator<char>());
 
         Config config;
         auto ec = glz::read_json(config, json);
@@ -37,7 +36,7 @@ class JsonConfigParser : public IConfigParser<Config> {
         return std::make_shared<Config>(config);
     }
 
-    int writeConfig(const Config &config, std::ostream &out) const {
+    int writeConfig(const Config& config, std::ostream& out) const {
         std::string json;
         auto ec = glz::write_json(config, json);
         if (ec) {

@@ -1,21 +1,21 @@
 {
-    "name": "utils",
-    "version-string": "1.1.0",
-    "description": "A collection of utilities for C++ development.",
-    "dependencies": [
-        "spdlog",
-        "glaze",
-        {
-            "name": "gtest",
-            "default-features": false
-        },
-        {
-            "name": "vcpkg-cmake",
-            "host": true
-        },
-        {
-            "name": "vcpkg-cmake-config",
-            "host": true
-        }
-    ]
+  "name": "utils",
+  "version-string": "1.1.0",
+  "description": "A collection of utilities for C++ development.",
+  "dependencies": [
+    "spdlog",
+    "glaze",
+    {
+      "name": "gtest",
+      "default-features": false
+    },
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
 }
