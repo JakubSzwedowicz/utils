@@ -4,14 +4,15 @@ on:
   pull_request:
     branches: [ master, main, develop ]
 
-permissions:
-  contents: write
-
 jobs:
   format:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
@@ -23,7 +24,6 @@ jobs:
           find src -name "*.cpp" -o -name "*.hpp" -o -name "*.h" | xargs clang-format -i
           find test -name "*.cpp" -o -name "*.hpp" -o -name "*.h" | xargs clang-format -i
 
-      - uses: stefanzweifel/git-auto-commit-action@v5
+      - uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "style: format code with clang-format"
-          file_pattern: "**/*.cpp **/*.hpp **/*.h"

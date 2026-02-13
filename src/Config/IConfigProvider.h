@@ -12,23 +12,23 @@ namespace Config {
 
 template <typename Config>
 class IConfigProvider {
-public:
-  virtual ~IConfigProvider() = default;
+   public:
+    virtual ~IConfigProvider() = default;
 
-  virtual void setConfig(std::shared_ptr<Config> config) {
-    std::lock_guard lock(m_mutex);
-    m_config = config;
-  }
+    virtual void setConfig(std::shared_ptr<Config> config) {
+        std::lock_guard lock(m_mutex);
+        m_config = config;
+    }
 
-  virtual std::shared_ptr<Config> getConfig() const {
-    std::lock_guard lock(m_mutex);
-    return m_config;
-  }
+    virtual std::shared_ptr<Config> getConfig() const {
+        std::lock_guard lock(m_mutex);
+        return m_config;
+    }
 
-protected:
-  mutable std::mutex m_mutex;
-  std::shared_ptr<Config> m_config;
+   protected:
+    mutable std::mutex m_mutex;
+    std::shared_ptr<Config> m_config;
 };
 
-} // namespace Config
-} // namespace Utils
+}  // namespace Config
+}  // namespace Utils
