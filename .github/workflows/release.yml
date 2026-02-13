@@ -7,29 +7,21 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
-          token: ${{ secrets.REGISTRY_PAT }}
-
-      - name: Setup vcpkg
-        run: |
-          ./lib/vcpkg/bootstrap-vcpkg.sh
-          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/lib/vcpkg" >> $GITHUB_ENV
-
-      - name: Setup Workspace
-        run: |
-          chmod +x scripts/setup_workspace.sh
-          ./scripts/setup_workspace.sh
+          fetch-depth: 0
 
       - name: Tag Release
         id: tag_version
         run: |
-          VERSION=$(jq -r '."version-string"' vcpkg.json)
+          VERSION=$(jq -r '."version"' vcpkg.json)
           TAG="v$VERSION"
-          if git rev-parse "origin/$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists remote"
+          if git ls-remote --exit-code --tags origin "$TAG" >/dev/null; then
+            echo "Tag $TAG already exists"
             echo "new_tag=false" >> $GITHUB_OUTPUT
           else
             git config user.name "github-actions[bot]"
@@ -44,13 +36,18 @@ jobs:
         if: steps.tag_version.outputs.new_tag == 'true'
         id: calculate_sha
         run: |
-             VERSION=${{ steps.tag_version.outputs.version }}
-             URL="https://github.com/${{ github.repository }}/archive/refs/tags/v${VERSION}.tar.gz"
-             echo "Downloading from $URL"
-             sleep 5 # Give GitHub a moment to realize the tag exists
-             curl -L -o release.tar.gz "$URL"
-             SHA512=$(sha512sum release.tar.gz | awk '{print $1}')
-             echo "SHA512=$SHA512" >> $GITHUB_OUTPUT
+          VERSION=${{ steps.tag_version.outputs.version }}
+          URL="https://github.com/${{ github.repository }}/archive/refs/tags/v${VERSION}.tar.gz"
+          echo "Downloading from $URL"
+          sleep 5
+          curl -L -o release.tar.gz "$URL"
+          SHA512=$(sha512sum release.tar.gz | awk '{print $1}')
+          echo "SHA512=$SHA512" >> $GITHUB_OUTPUT
+
+      - name: Setup vcpkg
+        if: steps.tag_version.outputs.new_tag == 'true'
+        run: |
+          ./lib/vcpkg/bootstrap-vcpkg.sh
 
       - name: Publish to Registry
         if: steps.tag_version.outputs.new_tag == 'true'
@@ -59,52 +56,31 @@ jobs:
           VERSION: ${{ steps.tag_version.outputs.version }}
           SHA512: ${{ steps.calculate_sha.outputs.SHA512 }}
         run: |
-          # Checkout Registry
-          echo "Cloning registry..."
           git clone https://x-access-token:${REGISTRY_PAT}@github.com/JakubSzwedowicz/vcpkg-registry.git registry_repo
           cd registry_repo
-          
-          # Setup Git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Create/Update Port
           mkdir -p ports/utils
           cp ../vcpkg.json ports/utils/vcpkg.json
-          
-          # Create Portfile
-          cat <<EOF > ports/utils/portfile.cmake
-          vcpkg_from_github(
-              OUT_SOURCE_PATH SOURCE_PATH
-              REPO JakubSzwedowicz/utils
-              REF "v${VERSION}"
-              SHA512 ${SHA512}
-              HEAD_REF develop
-          )
 
-          vcpkg_cmake_configure(
-              SOURCE_PATH "\${SOURCE_PATH}"
-          )
+          sed "s/__SHA512__/${SHA512}/g" \
+            ../.github/templates/portfile.cmake.in > ports/utils/portfile.cmake
 
-          vcpkg_cmake_install()
+          # Step 1: Commit port changes first (x-add-version reads committed state)
+          git add ports/
+          git commit -m "Update utils port to v${VERSION}" || echo "No port changes"
 
-          vcpkg_cmake_config_fixup(
-              PACKAGE_NAME "utils"
-              CONFIG_PATH "lib/cmake/utils"
-          )
+          # Step 2: Update version database using vcpkg
+          # Ensure manifest is formatted first to avoid vcpkg errors
+          ../lib/vcpkg/vcpkg format-manifest ports/utils/vcpkg.json
+          git add ports/utils/vcpkg.json
+          git commit --amend --no-edit || echo "No formatting changes to amend"
 
-          file(REMOVE_RECURSE "\${CURRENT_PACKAGES_DIR}/debug/include")
-          file(REMOVE_RECURSE "\${CURRENT_PACKAGES_DIR}/debug/share")
-          EOF
+          ../lib/vcpkg/vcpkg --x-builtin-ports-root=./ports --x-builtin-registry-versions-dir=./versions x-add-version --all
 
-          # Update Registry Database
-          ../lib/vcpkg/vcpkg x-add-version --all
-          
-          # Commit and Push
-          git add .
-          if git diff --staged --quiet; then
-            echo "No changes to registry"
-          else
-            git commit -m "Update utils to v${VERSION}"
-            git push origin main
-          fi
+          # Step 3: Commit version database and push
+          git add versions/
+          git commit -m "Update versions for utils v${VERSION}" || echo "No version changes"
+
+          git push origin main
