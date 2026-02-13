@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gtest/gtest.h>
+
 #include <memory>
 #include <string>
 
@@ -17,7 +18,7 @@ struct TestConfig {
 
 // Mock subscriber for testing ConfigPublisher
 class MockConfigSubscriber : public Utils::PublishSubscribe::ISubscriber<std::shared_ptr<TestConfig>> {
-public:
+   public:
     MockConfigSubscriber() : ISubscriber<std::shared_ptr<TestConfig>>() {}
 
     void onUpdate(const std::shared_ptr<TestConfig>& config) override {
@@ -25,16 +26,14 @@ public:
         updateCount++;
     }
 
-public:
+   public:
     std::shared_ptr<TestConfig> lastReceivedConfig = nullptr;
     int updateCount = 0;
 };
 
 // Helper function to create test config
-inline std::shared_ptr<TestConfig> createTestConfig(const std::string& name = "test",
-                                                   int value = 100,
-                                                   double rate = 2.71,
-                                                   bool enabled = false) {
+inline std::shared_ptr<TestConfig> createTestConfig(const std::string& name = "test", int value = 100,
+                                                    double rate = 2.71, bool enabled = false) {
     auto config = std::make_shared<TestConfig>();
     config->name = name;
     config->value = value;
